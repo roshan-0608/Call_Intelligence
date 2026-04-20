@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Environment variables (keeps API keys secret)
+.env
+
+# Large data files (no need to upload these)
+processed_calls.json
+calls.jsonl
+
+# Logs
+*.log
+
+# OS files (auto-created by Windows/Mac)
+.DS_Store
+Thumbs.db
