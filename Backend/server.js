@@ -3,7 +3,7 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import fs from "fs";
-import { processTranscript } from "../pipeline.js";
+import { processTranscript } from "./pipeline.js";
 
 console.log("Starting server...");
 
