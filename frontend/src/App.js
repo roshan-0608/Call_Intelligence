@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+const API_URL = "https://call-intelligence-backend-p4p5.onrender.com";
+
 function App() {
   const [calls, setCalls] = useState([]);
   const [search, setSearch] = useState("");
@@ -9,8 +11,9 @@ function App() {
   const [newTranscript, setNewTranscript] = useState("");
   const [showFormat, setShowFormat] = useState(false);
 
+
   useEffect(() => {
-    axios.get("http://localhost:5000/calls")
+    axios.get(`${API_URL}/calls`)
       .then(res => {
         setCalls(res.data);
       })
@@ -21,7 +24,7 @@ function App() {
 
   const handleUpload = async () => {
     try {
-      const res = await axios.post("http://localhost:5000/upload", {
+      const res = await axios.post(`${API_URL}/upload`, {
         transcript: newTranscript
       });
 
