@@ -15,7 +15,7 @@ app.use(express.json());
 
 let data = [];
 try {
-  data = JSON.parse(fs.readFileSync("../processed_calls.json", "utf-8"));
+  data = JSON.parse(fs.readFileSync("./processed_calls.json", "utf-8"));
 } catch {
   data = [];
 }
