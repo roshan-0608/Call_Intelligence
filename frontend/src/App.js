@@ -131,6 +131,17 @@ function App() {
           <br />
           First visit may take up to 60 seconds.
         </p>
+        {message && (
+          <p
+            style={{
+              marginTop: 15,
+              color: "#666",
+              fontStyle: "italic",
+            }}
+          >
+            {message}
+          </p>
+        )}
       </div>
     );
   }
