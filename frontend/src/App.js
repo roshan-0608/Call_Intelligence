@@ -10,16 +10,47 @@ function App() {
   const [selectedCall, setSelectedCall] = useState(null);
   const [newTranscript, setNewTranscript] = useState("");
   const [showFormat, setShowFormat] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
 
   useEffect(() => {
-    axios.get(`${API_URL}/calls`)
-      .then(res => {
+    let timeoutId;
+
+    // Show a message if backend is taking time
+    timeoutId = setTimeout(() => {
+      setMessage(
+        "Backend is starting (Render free tier). Please wait 30–60 seconds..."
+      );
+    }, 10000); // after 10 seconds
+
+    const fetchCalls = async () => {
+      try {
+        // Wake up backend first
+        await axios.get(`${API_URL}/health`);
+
+        // Fetch calls
+        const res = await axios.get(`${API_URL}/calls`, {
+          timeout: 90000, // wait up to 90 seconds
+        });
+
         setCalls(res.data);
-      })
-      .catch(err => {
-        console.log("ERROR:", err);
-      });
+      } catch (err) {
+        console.error(err);
+
+        setError(
+          "Unable to connect to the backend. It may be starting up. Please refresh after a few seconds."
+        );
+      } finally {
+        clearTimeout(timeoutId);
+        setLoading(false);
+      }
+    };
+
+    fetchCalls();
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
   const handleUpload = async () => {
@@ -28,10 +59,10 @@ function App() {
         transcript: newTranscript
       });
 
-    // add new call at top
+      // add new call at top
       setCalls(prev => [res.data, ...prev]);
 
-    // clear input
+      // clear input
       setNewTranscript("");
 
     } catch (err) {
@@ -39,7 +70,7 @@ function App() {
     }
   };
 
-  // 🔍 Filter logic
+  // Filter logic
   const filteredCalls = calls.filter((c) => {
     const matchesSearch =
       c.lead_name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -79,13 +110,56 @@ function App() {
     name: t.name,
     avgScore: (t.totalScore / t.count).toFixed(2)
   }))
-  .sort((a, b) => b.avgScore - a.avgScore);
+    .sort((a, b) => b.avgScore - a.avgScore);
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+          fontFamily: "Arial",
+        }}
+      >
+        <h2>Loading Dashboard...</h2>
+
+        <p>
+          Backend is starting (Render free tier).
+          <br />
+          First visit may take up to 60 seconds.
+        </p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div
+        style={{
+          padding: 40,
+          textAlign: "center",
+          fontFamily: "Arial",
+        }}
+      >
+        <h2>⚠ Unable to connect to the backend</h2>
+
+        <p>{error}</p>
+
+        <button onClick={() => window.location.reload()}>
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: 20 }}>
       <h1>Call Intelligence Dashboard</h1>
 
-      {/* 🔍 Search + Filter */}
+      {/* Search + Filter */}
       <div style={{ marginBottom: 20 }}>
         <input
           type="text"
@@ -199,54 +273,54 @@ function App() {
                   marginTop: 30,
                   padding: 20,
                   border: "2px solid blue"
-                  }}>
-                <h2>Call Details</h2>
+                }}>
+                  <h2>Call Details</h2>
 
-                <p><b>Telecaller:</b> {selectedCall.telecaller_name}</p>
-                <p><b>Lead:</b> {selectedCall.lead_name}</p>
+                  <p><b>Telecaller:</b> {selectedCall.telecaller_name}</p>
+                  <p><b>Lead:</b> {selectedCall.lead_name}</p>
 
-                <p><b>Stage:</b> {selectedCall.last_stage_reached}</p>
-                <p><b>Next Action:</b> {selectedCall.recommended_next_action}</p>
+                  <p><b>Stage:</b> {selectedCall.last_stage_reached}</p>
+                  <p><b>Next Action:</b> {selectedCall.recommended_next_action}</p>
 
-                <h3>Summary</h3>
-                <p>{selectedCall.summary}</p>
+                  <h3>Summary</h3>
+                  <p>{selectedCall.summary}</p>
 
-                <h3>Transcript</h3>
-                <pre style={{background: "#f4f4f4",padding: 10,whiteSpace: "pre-wrap"}}>
-                  {selectedCall.transcript}
-                </pre>
+                  <h3>Transcript</h3>
+                  <pre style={{ background: "#f4f4f4", padding: 10, whiteSpace: "pre-wrap" }}>
+                    {selectedCall.transcript}
+                  </pre>
 
-                <h3>Extraction</h3>
-                <p><b>Unit:</b> {selectedCall.extraction?.unit_configuration}</p>
-                <p><b>Budget:</b> {selectedCall.extraction?.budget_range?.min_lakhs} - {selectedCall.extraction?.budget_range?.max_lakhs}</p>
-                <p><b>Timeline:</b> {selectedCall.extraction?.timeline}</p>
-                <p><b>Site Visit:</b> {selectedCall.extraction?.site_visit_outcome}</p>
+                  <h3>Extraction</h3>
+                  <p><b>Unit:</b> {selectedCall.extraction?.unit_configuration}</p>
+                  <p><b>Budget:</b> {selectedCall.extraction?.budget_range?.min_lakhs} - {selectedCall.extraction?.budget_range?.max_lakhs}</p>
+                  <p><b>Timeline:</b> {selectedCall.extraction?.timeline}</p>
+                  <p><b>Site Visit:</b> {selectedCall.extraction?.site_visit_outcome}</p>
 
-                <h3>Quality Scores</h3>
+                  <h3>Quality Scores</h3>
 
-                <p>
-                  <b>Discovery:</b> {selectedCall.quality_scores?.discovery?.score}
-                  <br />
-                  {selectedCall.quality_scores?.discovery?.reason}
-                </p>
+                  <p>
+                    <b>Discovery:</b> {selectedCall.quality_scores?.discovery?.score}
+                    <br />
+                    {selectedCall.quality_scores?.discovery?.reason}
+                  </p>
 
-                <p>
-                  <b>Pitch:</b> {selectedCall.quality_scores?.pitch?.score}
-                  <br />
-                  {selectedCall.quality_scores?.pitch?.reason}
-                </p>
+                  <p>
+                    <b>Pitch:</b> {selectedCall.quality_scores?.pitch?.score}
+                    <br />
+                    {selectedCall.quality_scores?.pitch?.reason}
+                  </p>
 
-                <p>
-                  <b>Objection Handling:</b> {selectedCall.quality_scores?.objection_handling?.score}
-                  <br />
-                  {selectedCall.quality_scores?.objection_handling?.reason}
-                </p>
+                  <p>
+                    <b>Objection Handling:</b> {selectedCall.quality_scores?.objection_handling?.score}
+                    <br />
+                    {selectedCall.quality_scores?.objection_handling?.reason}
+                  </p>
 
-                <p>
-                  <b>Next Step:</b> {selectedCall.quality_scores?.next_step?.score}
-                  <br />
-                  {selectedCall.quality_scores?.next_step?.reason}
-                </p>
+                  <p>
+                    <b>Next Step:</b> {selectedCall.quality_scores?.next_step?.score}
+                    <br />
+                    {selectedCall.quality_scores?.next_step?.reason}
+                  </p>
                 </div>
               )}
             </div>
@@ -278,7 +352,7 @@ function App() {
               padding: 10,
               whiteSpace: "pre-wrap"
             }}>
-      {`[00:00-00:05] Agent: Hello sir, Suresh here from Skyline Properties
+              {`[00:00-00:05] Agent: Hello sir, Suresh here from Skyline Properties
       [00:05-00:12] Lead: haan sollunga, ena vishayam?
       [00:12-00:25] Agent: Sir, naanga Velachery-la oru puthusa 3BHK launch pannirukom...`}
             </pre>

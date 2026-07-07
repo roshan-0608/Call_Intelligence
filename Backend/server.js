@@ -24,6 +24,13 @@ app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
 });
 
+app.get("/health", (req, res) => {
+  res.json({
+    status: "Backend Running",
+    uptime: process.uptime(),
+  });
+});
+
 app.get("/calls", (req, res) => {
   res.json(data);
 });
@@ -53,15 +60,15 @@ app.post("/upload", async (req, res) => {
 
 
     const key = transcript
-        .trim()
-        .replace(/\s+/g, " ")   
-        .toLowerCase();         
+      .trim()
+      .replace(/\s+/g, " ")
+      .toLowerCase();
 
 
     if (cache.has(key)) {
-        console.log("⚡ Cache hit");
+      console.log("⚡ Cache hit");
 
-        return res.json(cache.get(key));
+      return res.json(cache.get(key));
     }
 
     console.log("🤖 Calling AI...");
@@ -69,10 +76,10 @@ app.post("/upload", async (req, res) => {
     const aiResult = await processTranscript(transcript);
 
     if (!aiResult) {
-        console.log("❌ AI returned null");
-        return res.status(500).json({
+      console.log("❌ AI returned null");
+      return res.status(500).json({
         error: "AI processing failed"
-        });
+      });
     }
 
     const newCall = {
