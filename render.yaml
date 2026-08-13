@@ -1,0 +1,80 @@
+# Render Blueprint for the API.
+#
+# Two ways to use this file:
+#
+#   1. New service — Render dashboard → New → Blueprint → point it at this repo.
+#      Everything below is applied automatically.
+#   2. Existing service — Render does not read this file for services created
+#      through the dashboard. Copy the values into Settings by hand; this file is
+#      then the written record of what those settings are.
+#
+# The database choice is the one real decision here — see the notes on
+# DATABASE_URL below.
+
+services:
+  - type: web
+    name: call-intelligence-api
+    runtime: node
+    plan: free
+    region: singapore # closest region to the calls in this dataset
+
+    # Root directory stays the repository root: the API imports
+    # @call-intel/shared, so npm has to install from where the workspaces are
+    # declared. `build:api` compiles shared + backend only, skipping the
+    # dashboard build, which Vercel handles.
+    buildCommand: npm ci && npm run db:generate && npm run build:api
+
+    # Migrations run on every boot: `migrate deploy` is idempotent and applies
+    # only what is missing, which is what you want on a platform that can
+    # replace the container at any time.
+    preDeployCommand: npm run db:deploy
+
+    startCommand: node backend/dist/index.js
+
+    healthCheckPath: /health/live
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      # Off: the dashboard is served by Vercel, so this process is API-only and
+      # keeps the API at the root (/calls, not /api/calls). Set to "on" instead
+      # if you ever want one service to serve both.
+      - key: SERVE_WEB
+        value: 'off'
+
+      - key: LLM_MODEL
+        value: llama-3.1-8b-instant
+
+      - key: PROMPT_VERSION
+        value: v4
+
+      - key: LOG_LEVEL
+        value: info
+
+      # The browser origin allowed to call this API. Must be the exact Vercel
+      # URL, no trailing slash. Add a comma-separated second entry for previews.
+      - key: CORS_ORIGINS
+        sync: false
+
+      # Set in the dashboard, never committed. Without it the API still serves
+      # all 150 calls read-only and /upload returns a clear 503.
+      - key: GROQ_API_KEY
+        sync: false
+
+      # DATABASE_URL — read this before deploying.
+      #
+      # Render's free plan has an ephemeral filesystem, so a SQLite file is wiped
+      # whenever the container restarts. Two workable options:
+      #
+      #   (a) Managed Postgres (recommended). Create one, put its connection
+      #       string here, and change `provider` to "postgresql" in
+      #       backend/prisma/schema.prisma, then regenerate the migrations.
+      #       Data then survives restarts.
+      #
+      #   (b) SQLite, accepting resets. Keep provider = "sqlite", set this to
+      #       file:./dev.db, and add `npm run db:seed` to preDeployCommand so the
+      #       150 committed calls are reloaded on every boot. Uploaded calls are
+      #       lost on restart — fine for a demo, and honest about the tradeoff.
+      - key: DATABASE_URL
+        sync: false

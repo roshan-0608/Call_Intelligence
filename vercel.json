@@ -1,0 +1,29 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "//": "Lives at the repository root, not in frontend/, because the dashboard is an npm workspace: it imports @call-intel/shared, so the install and the build have to happen from the root where the workspaces are defined. Set the Vercel project's Root Directory to './' for this file to apply.",
+
+  "installCommand": "npm ci",
+  "buildCommand": "npm run build:shared && npm run build -w @call-intel/frontend",
+  "outputDirectory": "frontend/dist",
+
+  "rewrites": [
+    {
+      "//": "Client-side routing: without this, refreshing /calls/CALL_0052 returns Vercel's 404 instead of the app. Asset requests are excluded so a missing file still 404s honestly.",
+      "source": "/((?!assets/).*)",
+      "destination": "/index.html"
+    }
+  ],
+
+  "headers": [
+    {
+      "//": "Vite fingerprints asset filenames, so they are safe to cache forever.",
+      "source": "/assets/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "//": "index.html must never be cached, or a deploy keeps serving the old bundle.",
+      "source": "/index.html",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    }
+  ]
+}

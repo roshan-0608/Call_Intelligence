@@ -17,6 +17,7 @@
   "scripts": {
     "build": "tsc -b shared backend && npm run build -w @call-intel/frontend",
     "build:shared": "tsc -b shared",
+    "build:api": "tsc -b shared backend",
     "dev": "concurrently -n backend,frontend -c cyan,magenta \"npm:dev:backend\" \"npm:dev:frontend\"",
     "dev:backend": "npm run dev -w @call-intel/backend",
     "dev:frontend": "npm run dev -w @call-intel/frontend",

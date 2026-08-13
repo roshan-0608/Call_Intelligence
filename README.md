@@ -296,15 +296,40 @@ Each of these is a decision with a reason, written up in
 
 ## Deployment
 
-Two shapes are supported, and the app detects which one it is in.
+Config for both platforms is committed, so the dashboards need almost no manual
+setup: `vercel.json` at the repo root for the dashboard, `render.yaml` for the API.
 
-**Split — Render + Vercel (the free-tier path).** The backend serves the API at
-the root; the frontend is a static build on Vercel with `VITE_API_URL` pointing at
-the backend. `frontend/vercel.json` supplies the SPA rewrite, without which
-refreshing `/calls/CALL_0052` would return Vercel's 404 instead of the app.
+**Split — Render + Vercel (the free-tier path).**
 
-**Single service — everything on one Render service.** No Vercel, no second
-host, and no CORS at all, because the dashboard and the API share an origin:
+| Vercel setting           | Value                                 |
+| ------------------------ | ------------------------------------- |
+| Root Directory           | `./` (the repo root, not `frontend/`) |
+| Install / Build / Output | taken from `vercel.json`              |
+| `VITE_API_URL`           | the Render API URL, no trailing slash |
+
+The dashboard is an npm workspace that imports `@call-intel/shared`, so install
+and build have to run from the repo root — that is why Root Directory is `./` and
+not `frontend/`. `vercel.json` also carries the SPA rewrite, without which
+refreshing `/calls/CALL_0052` returns Vercel's 404 instead of the app.
+
+| Render setting     | Value                                                                            |
+| ------------------ | -------------------------------------------------------------------------------- |
+| Root Directory     | blank (repo root)                                                                |
+| Build Command      | `npm ci && npm run db:generate && npm run build:api`                             |
+| Pre-Deploy Command | `npm run db:deploy`                                                              |
+| Start Command      | `node backend/dist/index.js`                                                     |
+| Health Check Path  | `/health/live`                                                                   |
+| Env                | `CORS_ORIGINS` (the Vercel URL), `GROQ_API_KEY`, `DATABASE_URL`, `SERVE_WEB=off` |
+
+**One thing to decide: the database.** Render's free plan has an ephemeral
+filesystem, so a SQLite file is wiped on restart. Either attach managed Postgres
+(switch `provider` in `backend/prisma/schema.prisma` and regenerate migrations),
+or keep SQLite and add `npm run db:seed` to the pre-deploy command so the 150
+committed calls reload on every boot — uploads are then lost on restart, which is
+an acceptable demo tradeoff as long as it is stated.
+
+**Single service — everything on one host.** No Vercel, no second host, and no
+CORS at all, because the dashboard and the API share an origin:
 
 ```bash
 npm run build
@@ -312,18 +337,9 @@ NODE_ENV=production SERVE_WEB=on npm start -w @call-intel/backend
 # http://localhost:5000 serves the dashboard; the API is under /api
 ```
 
-In this mode the API moves under `/api` so the dashboard owns `/calls/:id`.
-That switch is one env var (`SERVE_WEB`, documented in `.env.example`); `auto`
-means production only, so a stale build can never change routing during
-`npm run dev`.
-
-For Postgres, point `DATABASE_URL` at it and change one line in
-`backend/prisma/schema.prisma` — every column type used exists on both engines.
-
-Known limitations are listed at the end of [docs/decisions.md](docs/decisions.md),
-including the free-tier cold start and the fact that the golden set is 14 calls,
-which is enough to catch a systematic failure but not enough for a tight
-confidence interval on any single field.
+In this mode the API moves under `/api` so the dashboard owns `/calls/:id`. That
+switch is one env var (`SERVE_WEB`, documented in `.env.example`); `auto` means
+production only, so a stale build can never change routing during `npm run dev`.
 
 ## Licence
 
