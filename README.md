@@ -8,6 +8,13 @@ wants, scores the telecaller on four dimensions with a written rationale, decide
 the next action, and validates every field before it is allowed near the
 database.
 
+**▶ Live demo: https://call-intelligence-backend-p4p5.onrender.com**
+
+_Hosted on Render's free tier, so the first request after a quiet period takes
+30–60 seconds to wake. The dashboard shows skeletons while it does._
+
+![Overview — stat tiles and the four distributions](docs/img/overview.jpg)
+
 ```
 ┌────────────────┐  transcript   ┌──────────────────────────────────────────┐
 │  calls.jsonl   │──────────────▶│  shared/  — the contract                 │
@@ -106,6 +113,25 @@ committed to the repo. A key is needed only to analyze a _new_ transcript.
 - **Leaderboard** — telecallers ranked by average score, computed in SQL over the
   whole dataset, with per-dimension breakdowns and site-visit commit rate.
 - **Analyze transcript** — paste a new call, get it scored and stored.
+
+## Screens
+
+**Calls** — server-side search, six filters and six sort orders over 150 calls.
+Filter state lives in the URL, so a filtered view is shareable.
+
+![Calls list](docs/img/calls.jpg)
+
+**Call detail** — the transcript as speaker turns beside the extraction and the
+scores. The amber banner is a row the importer had to repair: it shows the exact
+value the model returned (`"2BHK | 3BHK | 4BHK | villa | plot | not_discussed"`),
+what it was changed to, and why.
+
+![Call detail with the repair note and transcript](docs/img/call-detail.jpg)
+
+**Leaderboard** — computed in SQL over the whole dataset, with per-dimension
+averages so a ranking can be explained rather than just displayed.
+
+![Telecaller leaderboard](docs/img/leaderboard.jpg)
 
 ## Project structure
 
