@@ -22,7 +22,11 @@ services:
     # @call-intel/shared, so npm has to install from where the workspaces are
     # declared. `build:api` compiles shared + backend only, skipping the
     # dashboard build, which Vercel handles.
-    buildCommand: npm ci && npm run db:generate && npm run build:api
+    # --include=dev is required, not optional: NODE_ENV=production is set below
+    # for the running server, and npm reads that during install too, skipping
+    # devDependencies. TypeScript and @types/node live there, so without this
+    # flag the build fails with "Cannot find type definition file for 'node'".
+    buildCommand: npm ci --include=dev && npm run db:generate && npm run build:api
 
     # Migrations run on every boot: `migrate deploy` is idempotent and applies
     # only what is missing, which is what you want on a platform that can
