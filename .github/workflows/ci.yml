@@ -15,11 +15,28 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
+    # Postgres matches production. The tests themselves stub the database, but
+    # the migration and seed steps at the end need a real engine to run against.
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: callintel_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     env:
       # No GROQ_API_KEY in CI on purpose: nothing in the test suite may depend on
       # a live model call. The API is expected to answer 503 on /upload here.
       NODE_ENV: test
-      DATABASE_URL: file:./ci.db
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/callintel_ci
 
     steps:
       - uses: actions/checkout@v4

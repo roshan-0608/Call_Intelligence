@@ -1,12 +1,13 @@
 // Call Intelligence data model.
 //
-// Portability note: Prisma requires a literal `provider`, so this file ships
-// with SQLite for zero-setup local development. Every field below uses types
-// that exist on both SQLite and PostgreSQL — no native enums, no arrays, no
-// Json columns — so moving to Postgres is a two-step change:
+// Runs on PostgreSQL (hosted on Neon). It ran on SQLite throughout development,
+// and the move needed only this provider line plus fresh migrations — because
+// every field below uses types that exist on both engines: no native enums, no
+// arrays, no Json columns. That portability was deliberate, and it is why the
+// switch was a one-line change rather than a rewrite.
 //
-//   1. set provider = "postgresql" and DATABASE_URL to your Postgres URL
-//   2. rm -rf prisma/migrations && npm run db:migrate -w @call-intel/backend
+// To go back to SQLite for offline work: set provider = "sqlite", point
+// DATABASE_URL at file:./dev.db, and regenerate the migrations.
 //
 // Enum-like columns are plain strings validated by the Zod schema in
 // @call-intel/shared, which is the single authority on legal values. That keeps
@@ -17,7 +18,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

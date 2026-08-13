@@ -15,7 +15,8 @@ export default defineConfig({
     // with a known-good, key-less environment: uploads are expected to 503.
     env: {
       NODE_ENV: 'test',
-      DATABASE_URL: 'file:./test-unused.db',
+      // Never connected to: every test stubs the database module.
+      DATABASE_URL: 'postgresql://unused:unused@localhost:5432/unused',
       CORS_ORIGINS: '*',
       GROQ_API_KEY: '',
     },

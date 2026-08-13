@@ -62,19 +62,11 @@ services:
       - key: GROQ_API_KEY
         sync: false
 
-      # DATABASE_URL — read this before deploying.
+      # Neon PostgreSQL connection string, set in the dashboard.
       #
-      # Render's free plan has an ephemeral filesystem, so a SQLite file is wiped
-      # whenever the container restarts. Two workable options:
-      #
-      #   (a) Managed Postgres (recommended). Create one, put its connection
-      #       string here, and change `provider` to "postgresql" in
-      #       backend/prisma/schema.prisma, then regenerate the migrations.
-      #       Data then survives restarts.
-      #
-      #   (b) SQLite, accepting resets. Keep provider = "sqlite", set this to
-      #       file:./dev.db, and add `npm run db:seed` to preDeployCommand so the
-      #       150 committed calls are reloaded on every boot. Uploaded calls are
-      #       lost on restart — fine for a demo, and honest about the tradeoff.
+      # Postgres rather than SQLite because Render's filesystem is ephemeral: a
+      # SQLite file is deleted whenever the container restarts, which would lose
+      # every uploaded call. Run `npm run db:deploy` (already the pre-deploy
+      # command) and `npm run db:seed` once to load the 150 committed calls.
       - key: DATABASE_URL
         sync: false

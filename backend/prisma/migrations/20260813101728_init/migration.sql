@@ -1,25 +1,27 @@
 -- CreateTable
 CREATE TABLE "Telecaller" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Telecaller_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Call" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "callId" TEXT NOT NULL,
     "telecallerId" TEXT NOT NULL,
     "leadName" TEXT NOT NULL,
-    "occurredAt" DATETIME NOT NULL,
+    "occurredAt" TIMESTAMP(3) NOT NULL,
     "durationSec" INTEGER NOT NULL,
     "transcript" TEXT NOT NULL,
     "transcriptHash" TEXT NOT NULL,
     "source" TEXT NOT NULL DEFAULT 'seed',
     "searchText" TEXT NOT NULL,
     "unitConfiguration" TEXT NOT NULL,
-    "budgetMinLakhs" REAL,
-    "budgetMaxLakhs" REAL,
+    "budgetMinLakhs" DOUBLE PRECISION,
+    "budgetMaxLakhs" DOUBLE PRECISION,
     "budgetDiscussed" BOOLEAN NOT NULL DEFAULT false,
     "timeline" TEXT NOT NULL,
     "siteVisitOutcome" TEXT NOT NULL,
@@ -31,7 +33,7 @@ CREATE TABLE "Call" (
     "objectionHandlingReason" TEXT NOT NULL,
     "nextStepScore" INTEGER NOT NULL,
     "nextStepReason" TEXT NOT NULL,
-    "overallScore" REAL NOT NULL,
+    "overallScore" DOUBLE PRECISION NOT NULL,
     "lastStageReached" TEXT NOT NULL,
     "recommendedNextAction" TEXT NOT NULL,
     "summary" TEXT NOT NULL,
@@ -39,38 +41,42 @@ CREATE TABLE "Call" (
     "promptVersion" TEXT NOT NULL,
     "promptTokens" INTEGER NOT NULL DEFAULT 0,
     "completionTokens" INTEGER NOT NULL DEFAULT 0,
-    "costUsd" REAL NOT NULL DEFAULT 0,
+    "costUsd" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "latencyMs" INTEGER NOT NULL DEFAULT 0,
     "validationStatus" TEXT NOT NULL DEFAULT 'valid',
     "repairNotes" TEXT,
     "warnings" TEXT,
-    "analyzedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
-    CONSTRAINT "Call_telecallerId_fkey" FOREIGN KEY ("telecallerId") REFERENCES "Telecaller" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "analyzedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Call_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "PreferredLocation" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "callId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    CONSTRAINT "PreferredLocation_callId_fkey" FOREIGN KEY ("callId") REFERENCES "Call" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+
+    CONSTRAINT "PreferredLocation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "AnalysisCache" (
-    "key" TEXT NOT NULL PRIMARY KEY,
+    "key" TEXT NOT NULL,
     "transcriptHash" TEXT NOT NULL,
     "model" TEXT NOT NULL,
     "promptVersion" TEXT NOT NULL,
     "analysisJson" TEXT NOT NULL,
     "promptTokens" INTEGER NOT NULL DEFAULT 0,
     "completionTokens" INTEGER NOT NULL DEFAULT 0,
-    "costUsd" REAL NOT NULL DEFAULT 0,
+    "costUsd" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "hitCount" INTEGER NOT NULL DEFAULT 0,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "lastHitAt" DATETIME
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "lastHitAt" TIMESTAMP(3),
+
+    CONSTRAINT "AnalysisCache_pkey" PRIMARY KEY ("key")
 );
 
 -- CreateIndex
@@ -108,3 +114,9 @@ CREATE UNIQUE INDEX "PreferredLocation_callId_name_key" ON "PreferredLocation"("
 
 -- CreateIndex
 CREATE INDEX "AnalysisCache_transcriptHash_idx" ON "AnalysisCache"("transcriptHash");
+
+-- AddForeignKey
+ALTER TABLE "Call" ADD CONSTRAINT "Call_telecallerId_fkey" FOREIGN KEY ("telecallerId") REFERENCES "Telecaller"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PreferredLocation" ADD CONSTRAINT "PreferredLocation_callId_fkey" FOREIGN KEY ("callId") REFERENCES "Call"("id") ON DELETE CASCADE ON UPDATE CASCADE;

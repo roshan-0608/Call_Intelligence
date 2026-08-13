@@ -39,8 +39,9 @@ setup, debugging rate limits and model deprecations, the retry and cache code.
 
 **Rewrite.** Claude Code (Opus), working from a review of the original. It
 produced the monorepo, the Zod contract, the API, the dashboard, the eval harness
-and the tests, under my direction on scope and technical choices (SQLite +
-Prisma, full frontend rewrite, TypeScript end-to-end).
+and the tests, under my direction on scope and technical choices (Prisma with
+SQLite for development and PostgreSQL in production, full frontend rewrite,
+TypeScript end-to-end).
 
 The 14 golden-set labels were produced by reading each transcript against the
 rubric, deliberately without looking at the model's answer for that call first —
@@ -73,8 +74,9 @@ _where_ a second call might pay for itself (`timeline`, `site_visit_outcome`), s
 the next attempt would be a measurement, not a guess.
 
 **MongoDB.** Rejected. The access patterns are relational — calls belong to
-telecallers, locations belong to calls, the leaderboard is a group-by. SQLite via
-Prisma gives that with zero setup and ports to Postgres unchanged.
+telecallers, locations belong to calls, the leaderboard is a group-by. Prisma
+gives that, and the schema was kept engine-neutral so the move from SQLite to
+PostgreSQL later cost one line.
 
 **Streamlit for the UI.** Rejected. Fine for a prototype, but the point of the
 dashboard is that it looks and behaves like a product.

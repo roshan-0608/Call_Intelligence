@@ -321,12 +321,12 @@ refreshing `/calls/CALL_0052` returns Vercel's 404 instead of the app.
 | Health Check Path  | `/health/live`                                                                   |
 | Env                | `CORS_ORIGINS` (the Vercel URL), `GROQ_API_KEY`, `DATABASE_URL`, `SERVE_WEB=off` |
 
-**One thing to decide: the database.** Render's free plan has an ephemeral
-filesystem, so a SQLite file is wiped on restart. Either attach managed Postgres
-(switch `provider` in `backend/prisma/schema.prisma` and regenerate migrations),
-or keep SQLite and add `npm run db:seed` to the pre-deploy command so the 150
-committed calls reload on every boot — uploads are then lost on restart, which is
-an acceptable demo tradeoff as long as it is stated.
+**The database is PostgreSQL, hosted on Neon.** The host's filesystem is
+ephemeral, so a SQLite file would be deleted on every restart — fine for the 150
+seeded calls, not fine for a call someone uploads. Set `DATABASE_URL` to the Neon
+connection string in both the Render dashboard and your local `.env`, then run
+`npm run db:deploy && npm run db:seed` once. Neon's free tier sleeps when idle and
+wakes on the next connection.
 
 **Single service — everything on one host.** No Vercel, no second host, and no
 CORS at all, because the dashboard and the API share an origin:

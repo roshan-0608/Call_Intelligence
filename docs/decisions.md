@@ -42,23 +42,36 @@ worth an eval run to price the accuracy difference.
 
 ---
 
-## 3. A JSON file as the dataset, a database as the store
+## 3. A JSON file as the dataset, PostgreSQL as the store
 
-**Decision.** `backend/src/data/calls.seed.json` is the committed dataset; SQLite via Prisma
-is what the API reads.
+**Decision.** `backend/src/data/calls.seed.json` is the committed dataset;
+PostgreSQL (hosted on Neon) is what the API reads. SQLite was used throughout
+development.
 
-**Alternatives.** JSON file as the live store (the original design); Postgres
-from the start; MongoDB.
+**Alternatives.** JSON file as the live store (the original design); MongoDB;
+staying on SQLite in production.
 
 **Why.** The JSON file makes the dataset reviewable in a diff and lets the whole
-project run with no database service. But a file cannot answer "page 3 of calls
-sorted by score, filtered to one telecaller" without loading everything, and it
-loses uploads on restart. Prisma gives real queries, migrations and a seed path,
-and SQLite needs no setup.
+project be rebuilt from scratch. But a file cannot answer "page 3 of calls sorted
+by score, filtered to one telecaller" without loading everything, and it loses
+uploads on restart. Prisma gives real queries, migrations and a seed path.
 
-**What I would change.** Nothing for this scale. The schema deliberately avoids
-native enums, arrays and JSON columns so the move to Postgres is a provider line
-and a fresh migration.
+Production is Postgres rather than SQLite for one concrete reason: the host's
+filesystem is ephemeral, so a SQLite file is deleted on every restart. That is
+tolerable for the 150 seeded calls (they reload) and not tolerable for a call a
+user uploads.
+
+**What this cost.** Almost nothing, and that was the point. The switch was one
+line — `provider = "sqlite"` to `"postgresql"` — plus regenerating migrations,
+because the schema deliberately avoided anything engine-specific: no native
+enums, no arrays, no Json columns. Enum-like columns are plain strings validated
+by Zod. A schema that had leaned on Postgres enums would have needed a rewrite;
+this one needed a word.
+
+**What I would change.** Nothing at this scale. Neon's free tier sleeps when idle
+and wakes on the next connection, which adds a second or so to the first request
+after a quiet period — acceptable, and cheaper than the alternatives that either
+delete free databases after 30 days or require a manual click to wake.
 
 ---
 
