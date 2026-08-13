@@ -1,0 +1,156 @@
+[
+  {
+    "call_id": "CALL_0000",
+    "unit_configuration": "plot",
+    "budget_range": "not_discussed",
+    "timeline": "6_to_12_months",
+    "preferred_locations": ["Vandalur"],
+    "site_visit_outcome": "committed_no_date",
+    "last_stage_reached": "close_attempt",
+    "recommended_next_action": "confirm_site_visit",
+    "note": "15L is the agent's starting price, not the lead's budget. 'Exploring, decide after 6 months' resolves to the timeframe."
+  },
+  {
+    "call_id": "CALL_0007",
+    "unit_configuration": "not_discussed",
+    "budget_range": "not_discussed",
+    "timeline": "unclear",
+    "preferred_locations": [],
+    "site_visit_outcome": "committed_no_date",
+    "last_stage_reached": "close_attempt",
+    "recommended_next_action": "confirm_site_visit",
+    "note": "'Not a constraint' is not a figure. No location or configuration ever stated."
+  },
+  {
+    "call_id": "CALL_0015",
+    "unit_configuration": "not_discussed",
+    "budget_range": "not_discussed",
+    "timeline": "6_to_12_months",
+    "preferred_locations": ["Urapakkam"],
+    "site_visit_outcome": "not_asked",
+    "last_stage_reached": "discovery",
+    "recommended_next_action": "schedule_callback_3_days",
+    "note": "36s call, questions only, no pitch and no visit ask."
+  },
+  {
+    "call_id": "CALL_0023",
+    "unit_configuration": "not_discussed",
+    "budget_range": "not_discussed",
+    "timeline": "exploring",
+    "preferred_locations": ["Urapakkam"],
+    "site_visit_outcome": "committed_with_date",
+    "last_stage_reached": "next_step_confirmed",
+    "recommended_next_action": "confirm_site_visit",
+    "note": "Agent pitched 2BHK; the lead never stated a configuration. Saturday 10am fixed."
+  },
+  {
+    "call_id": "CALL_0032",
+    "unit_configuration": "not_discussed",
+    "budget_range": "not_discussed",
+    "timeline": "immediate",
+    "preferred_locations": ["Chengalpattu"],
+    "site_visit_outcome": "committed_no_date",
+    "last_stage_reached": "close_attempt",
+    "recommended_next_action": "confirm_site_visit",
+    "note": "'Immediate, book within two months' outranks the later 'just exploring' aside. Repaired row in the seed data."
+  },
+  {
+    "call_id": "CALL_0044",
+    "unit_configuration": "not_discussed",
+    "budget_range": { "min_lakhs": 39, "max_lakhs": 46 },
+    "timeline": "exploring",
+    "preferred_locations": ["Tambaram"],
+    "site_visit_outcome": "committed_with_date",
+    "last_stage_reached": "next_step_confirmed",
+    "recommended_next_action": "confirm_site_visit",
+    "note": "Lead named 39-46L themselves. Sunday 11am confirmed."
+  },
+  {
+    "call_id": "CALL_0052",
+    "unit_configuration": "not_discussed",
+    "budget_range": { "min_lakhs": 16, "max_lakhs": 30 },
+    "timeline": "exploring",
+    "preferred_locations": ["Padappai"],
+    "site_visit_outcome": "declined",
+    "last_stage_reached": "close_attempt",
+    "recommended_next_action": "schedule_callback_3_days",
+    "note": "'We'll see, I'll call when free' is a deflection. Repaired row: the model echoed the enum spec here."
+  },
+  {
+    "call_id": "CALL_0069",
+    "unit_configuration": "not_discussed",
+    "budget_range": "not_discussed",
+    "timeline": "exploring",
+    "preferred_locations": [],
+    "site_visit_outcome": "committed_with_date",
+    "last_stage_reached": "next_step_confirmed",
+    "recommended_next_action": "confirm_site_visit",
+    "note": "75L is a competitor's price, not the lead's budget. 'Still deciding on the location' is not a preference. Repaired row."
+  },
+  {
+    "call_id": "CALL_0082",
+    "unit_configuration": "2BHK",
+    "budget_range": { "min_lakhs": 42, "max_lakhs": 55 },
+    "timeline": "unclear",
+    "preferred_locations": ["Trichy Thillai Nagar"],
+    "site_visit_outcome": "committed_no_date",
+    "last_stage_reached": "close_attempt",
+    "recommended_next_action": "confirm_site_visit",
+    "note": "Repaired row: a call stage had leaked into site_visit_outcome."
+  },
+  {
+    "call_id": "CALL_0094",
+    "unit_configuration": "not_discussed",
+    "budget_range": "not_discussed",
+    "timeline": "unclear",
+    "preferred_locations": ["Poonamallee"],
+    "site_visit_outcome": "committed_no_date",
+    "last_stage_reached": "close_attempt",
+    "recommended_next_action": "confirm_site_visit",
+    "note": "'Just exploring' answered the unit-type question, not a timeline question. Repaired row (zero budget)."
+  },
+  {
+    "call_id": "CALL_0103",
+    "unit_configuration": "2BHK",
+    "budget_range": "not_discussed",
+    "timeline": "unclear",
+    "preferred_locations": ["Chengalpattu"],
+    "site_visit_outcome": "call_cut",
+    "last_stage_reached": "discovery",
+    "recommended_next_action": "schedule_callback_3_days",
+    "note": "26s call, line drops mid-question. Repaired row (zero budget)."
+  },
+  {
+    "call_id": "CALL_0117",
+    "unit_configuration": "4BHK",
+    "budget_range": { "min_lakhs": 93, "max_lakhs": 106 },
+    "timeline": "unclear",
+    "preferred_locations": ["Maraimalai Nagar"],
+    "site_visit_outcome": "declined",
+    "last_stage_reached": "close_attempt",
+    "recommended_next_action": "send_brochure_whatsapp",
+    "note": "Lead deflected the visit and asked for a brochure instead. Repaired row."
+  },
+  {
+    "call_id": "CALL_0130",
+    "unit_configuration": "plot",
+    "budget_range": { "min_lakhs": 23, "max_lakhs": 36 },
+    "timeline": "3_to_6_months",
+    "preferred_locations": ["Vandalur"],
+    "site_visit_outcome": "committed_no_date",
+    "last_stage_reached": "close_attempt",
+    "recommended_next_action": "confirm_site_visit",
+    "note": "'Decision in 3-4 months' outranks the 'just exploring' aside."
+  },
+  {
+    "call_id": "CALL_0141",
+    "unit_configuration": "not_discussed",
+    "budget_range": { "min_lakhs": 42, "max_lakhs": 48 },
+    "timeline": "exploring",
+    "preferred_locations": ["Singaperumal Koil"],
+    "site_visit_outcome": "declined",
+    "last_stage_reached": "close_attempt",
+    "recommended_next_action": "schedule_callback_3_days",
+    "note": "Agent pitched 2BHK; the lead never stated a configuration. Deflected the visit. Repaired row."
+  }
+]

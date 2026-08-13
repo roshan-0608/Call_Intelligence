@@ -1,17 +1,60 @@
 {
-  "name": "call_intelligence",
-  "version": "1.0.0",
-  "description": "",
-  "main": "pipeline.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "name": "call-intelligence",
+  "version": "2.0.0",
+  "description": "AI pipeline and coaching dashboard that turns code-mixed Tamil-English real estate sales calls into structured lead data and scored performance insights.",
+  "private": true,
   "type": "module",
-  "dependencies": {
-    "axios": "^1.15.0"
+  "license": "MIT",
+  "author": "Roshan Jadhav",
+  "engines": {
+    "node": ">=20.11"
   },
-  "devDependencies": {}
+  "workspaces": [
+    "shared",
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "build": "tsc -b shared backend && npm run build -w @call-intel/frontend",
+    "build:shared": "tsc -b shared",
+    "dev": "concurrently -n backend,frontend -c cyan,magenta \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "dev:backend": "npm run dev -w @call-intel/backend",
+    "dev:frontend": "npm run dev -w @call-intel/frontend",
+    "db:generate": "prisma generate --schema backend/prisma/schema.prisma",
+    "db:migrate": "prisma migrate dev --schema backend/prisma/schema.prisma",
+    "db:deploy": "prisma migrate deploy --schema backend/prisma/schema.prisma",
+    "db:seed": "npm run build:shared && tsx --env-file-if-exists=.env backend/src/seed.ts",
+    "db:reset": "prisma migrate reset --force --schema backend/prisma/schema.prisma",
+    "db:studio": "prisma studio --schema backend/prisma/schema.prisma",
+    "eval": "npm run build:shared && tsx --env-file-if-exists=.env backend/src/eval/index.ts",
+    "process-calls": "npm run build:shared && tsx --env-file-if-exists=.env backend/src/processCalls.ts",
+    "validate:dataset": "npm run build:shared && tsx --env-file-if-exists=.env backend/src/validateDataset.ts",
+    "pretest": "npm run build:shared",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc -b shared backend && npm run typecheck -w @call-intel/frontend",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md,css}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md,css}\""
+  },
+  "prisma": {
+    "schema": "backend/prisma/schema.prisma",
+    "seed": "tsx --env-file-if-exists=.env backend/src/seed.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@types/node": "^22.10.2",
+    "concurrently": "^9.1.0",
+    "eslint": "^9.17.0",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.1",
+    "vite": "^6.0.5",
+    "vitest": "^2.1.8"
+  },
+  "allowScripts": {}
 }

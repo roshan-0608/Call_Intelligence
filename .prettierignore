@@ -1,0 +1,8 @@
+node_modules
+dist
+build
+coverage
+*.tsbuildinfo
+backend/src/data/calls.seed.json
+package-lock.json
+backend/prisma/migrations

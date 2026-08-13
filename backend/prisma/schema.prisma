@@ -1,0 +1,151 @@
+// Call Intelligence data model.
+//
+// Portability note: Prisma requires a literal `provider`, so this file ships
+// with SQLite for zero-setup local development. Every field below uses types
+// that exist on both SQLite and PostgreSQL — no native enums, no arrays, no
+// Json columns — so moving to Postgres is a two-step change:
+//
+//   1. set provider = "postgresql" and DATABASE_URL to your Postgres URL
+//   2. rm -rf prisma/migrations && npm run db:migrate -w @call-intel/backend
+//
+// Enum-like columns are plain strings validated by the Zod schema in
+// @call-intel/shared, which is the single authority on legal values. That keeps
+// the enum defined in exactly one place instead of three (DB, API, UI).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// A sales agent. Normalized out of Call so the leaderboard is a real
+/// aggregate query rather than a client-side reduce over every row.
+model Telecaller {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  calls Call[]
+}
+
+/// One analyzed call: source metadata, extraction, scores, and the provenance
+/// of the analysis (which model and prompt version produced it, at what cost).
+model Call {
+  id     String @id @default(cuid())
+  /// Business key from the upstream call system, e.g. CALL_0042 or UPLOAD_1712.
+  callId String @unique
+
+  telecallerId String
+  telecaller   Telecaller @relation(fields: [telecallerId], references: [id], onDelete: Cascade)
+
+  leadName    String
+  occurredAt  DateTime
+  durationSec Int
+  transcript  String
+  /// SHA-256 of the normalized transcript; makes re-upload idempotent.
+  transcriptHash String
+  /// "seed" for the batch-processed dataset, "upload" for API submissions.
+  source      String   @default("seed")
+  /// Lowercased "leadName telecallerName callId", written on every insert.
+  ///
+  /// Prisma's `mode: 'insensitive'` is PostgreSQL-only, and SQLite's LIKE is
+  /// case-insensitive only for ASCII. Searching a pre-lowercased column behaves
+  /// identically on both engines, so the Postgres migration cannot silently
+  /// turn search case-sensitive.
+  searchText  String
+
+  // --- Extraction ---------------------------------------------------------
+  unitConfiguration String
+  /// Null when budget was not discussed. Two nullable columns plus a boolean
+  /// beat a magic sentinel: "not discussed" and "₹0" stay distinguishable.
+  budgetMinLakhs    Float?
+  budgetMaxLakhs    Float?
+  budgetDiscussed   Boolean @default(false)
+  timeline          String
+  siteVisitOutcome  String
+
+  // --- Quality scores -----------------------------------------------------
+  discoveryScore         Int
+  discoveryReason        String
+  pitchScore             Int
+  pitchReason            String
+  objectionHandlingScore Int
+  objectionHandlingReason String
+  nextStepScore          Int
+  nextStepReason         String
+  /// Denormalized mean of the four scores so the API can sort and paginate by
+  /// it in the database instead of loading every row to compute it.
+  overallScore           Float
+
+  lastStageReached      String
+  recommendedNextAction String
+  summary               String
+
+  // --- Analysis provenance -------------------------------------------------
+  model            String
+  promptVersion    String
+  promptTokens     Int    @default(0)
+  completionTokens Int    @default(0)
+  costUsd          Float  @default(0)
+  latencyMs        Int    @default(0)
+  /// "valid" | "repaired" — repaired rows came from the pre-validation dataset
+  /// and were coerced deterministically at seed time.
+  validationStatus String @default("valid")
+  /// JSON array of repair notes, present only for repaired rows.
+  repairNotes      String?
+  /// JSON array of soft-rule warnings (e.g. summary was not two sentences).
+  warnings         String?
+
+  analyzedAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  locations PreferredLocation[]
+
+  @@index([telecallerId])
+  @@index([searchText])
+  @@index([lastStageReached])
+  @@index([overallScore])
+  @@index([occurredAt])
+  @@index([transcriptHash])
+  @@index([validationStatus])
+}
+
+/// Buying-preference locations, one row each. A join table rather than a JSON
+/// blob so "which areas are in demand" is a group-by, not a string scan.
+model PreferredLocation {
+  id     String @id @default(cuid())
+  callId String
+  call   Call   @relation(fields: [callId], references: [id], onDelete: Cascade)
+  name   String
+
+  @@unique([callId, name])
+  @@index([name])
+}
+
+/// Persistent idempotency for the upload endpoint.
+///
+/// Replaces the in-process Map, which lost every entry on restart — on a free
+/// tier that sleeps, that meant the cache was almost always cold. The key
+/// includes model and prompt version, so bumping either is a miss by
+/// construction instead of silently serving analyses from an old prompt.
+model AnalysisCache {
+  key            String   @id
+  transcriptHash String
+  model          String
+  promptVersion  String
+  /// The validated analysis, stored as JSON text for engine portability.
+  analysisJson   String
+  promptTokens   Int      @default(0)
+  completionTokens Int    @default(0)
+  costUsd        Float    @default(0)
+  /// Times this entry was served instead of calling the model.
+  hitCount       Int      @default(0)
+  createdAt      DateTime @default(now())
+  lastHitAt      DateTime?
+
+  @@index([transcriptHash])
+}

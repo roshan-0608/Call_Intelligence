@@ -1,15 +1,43 @@
 # Dependencies
 node_modules/
 
-# Environment variables (keeps API keys secret)
+# Environment variables — never commit real keys
 .env
+.env.local
+.env.*.local
 
-# Large data files (no need to upload these)
-calls.jsonl
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Database (SQLite dev database is disposable; it is rebuilt by db:seed)
+*.db
+*.db-journal
+*.sqlite
+backend/prisma/dev.db*
+
+# Raw source transcripts (not redistributable)
+
+backend/src/data/calls.jsonl
+
+# Eval run artifacts (the committed summary lives in docs/eval-results.md)
+eval-runs/
 
 # Logs
 *.log
+npm-debug.log*
 
-# OS files (auto-created by Windows/Mac)
+# Test / coverage output
+coverage/
+playwright-report/
+test-results/
+
+# OS files
 .DS_Store
 Thumbs.db
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
