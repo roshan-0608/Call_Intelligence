@@ -8,6 +8,10 @@ wants, scores the telecaller on four dimensions with a written rationale, decide
 the next action, and validates every field before it is allowed near the
 database.
 
+[![CI](https://github.com/roshan-0608/Call_Intelligence/actions/workflows/ci.yml/badge.svg)](https://github.com/roshan-0608/Call_Intelligence/actions/workflows/ci.yml)
+[![Live demo](https://img.shields.io/badge/live%20demo-online-2a78d6)](https://call-intelligence-backend-p4p5.onrender.com)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 **▶ Live demo: https://call-intelligence-backend-p4p5.onrender.com**
 
 _Hosted on Render's free tier, so the first request after a quiet period takes
